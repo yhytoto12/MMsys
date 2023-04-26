@@ -41,19 +41,6 @@ DPN | [Google Drive](https://drive.google.com/file/d/1W6EZ-caNd9N6m7eIRzl-cx5N2R
 
 </br>
 
-## Codes with accuracy above 95%
-
-These are some of the codes (open to public) that achieve accuracy of above 95%</br>
-* **LaMCTS (Latent Action Monte Carlo Tree Search)**</br>
-  * [GitHub](https://github.com/facebookresearch/LaMCTS)</br>
-  * CIFAR-10 accuracy: **99.03%**</br>
-* **Divide and Co-training**</br>
-  * [GitHub](https://github.com/mzhaoshuai/Divide-and-Co-training)</br>
-  * CIFAR-10 accuracy: **98.71%**</br>
-* **MPL (Meta Pseudo Labels)**</br>
-  * [GitHub](https://github.com/kekmodel/MPL-pytorch)</br>
-  * CIFAR-10 accuracy: **96.11%**</br>
-
 ## Reference
 https://pytorch.org/tutorials/beginner/blitz/cifar10_tutorial.html</br>
 https://github.com/lukemelas/EfficientNet-PyTorch</br>
