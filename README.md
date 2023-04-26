@@ -22,6 +22,13 @@ Folder Structure
 └── utils.py            
 ```
 
+Environment setting:
+```
+conda create -n mmsys python=3.7
+conda activate mmsys
+
+```
+
 Train the model with CIFAR-10 dataset:
 ```
 CUDA_VISIBLE_DEVICES=1 python main.py
