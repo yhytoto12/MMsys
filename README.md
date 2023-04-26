@@ -1,5 +1,3 @@
-# SNU_CV_CIFAR10_CNN
-
 Folder Structure
 ```bash
 .
