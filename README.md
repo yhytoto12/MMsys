@@ -14,7 +14,7 @@
 ``` shell
 conda create -n mmsys python=3.10
 conda activate mmsys
-pip install -r requirements.txt
+pip install -r requirements_synthetic.txt
 ```
 
 ### How to use MultimodalDataLoadManager
