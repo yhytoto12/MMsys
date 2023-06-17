@@ -1,0 +1,18 @@
+num_modes : 4
+manager:
+  type: sequential
+  preprocess_only: True
+
+feature_extractors :
+- resnet50
+- resnet50
+- resnet50
+- resnet50
+
+fusion:
+  out_features: 1024
+
+profiler:
+  num_iterations: 10
+  log_dir: log/synthetic
+  name: sequential

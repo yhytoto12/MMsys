@@ -1,0 +1,18 @@
+num_modes : 4
+manager:
+  type: parallel
+  preprocess_only: True
+
+feature_extractors :
+- resnet34
+- resnet34
+- resnet34
+- resnet34
+
+fusion:
+  out_features: 1024
+
+profiler:
+  num_iterations: 10
+  log_dir: log/synthetic
+  name: parallel

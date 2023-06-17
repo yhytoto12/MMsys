@@ -1,59 +1,76 @@
-Folder Structure
-```bash
-.
-├── dataset
-│   └── load_cifar.py
-├── model
-│   ├── HCGNet
-│   ├── densenet
-│   ├── dla
-│   ├── dpn
-│   ├── efficientnet
-│   ├── efficientnetV2
-│   ├── mobilenetV3
-│   ├── resnet
-│   ├── resnext
-│   └── vgg
-├── notebooks
-│   └── Pretrained_HCGNet.ipynb
-├── main.py
-├── train_model.py
-├── test_model.py             
-└── utils.py            
+# Improved Multimodal Real-Time Data Loading
+
+- Describe our methods
+<img src='assets/algorithm.png'>
+
+
+## Requirements
+
+- Python 3.10
+- PyTorch 2.0.1
+- CUDA 11.2
+
+## Quick Start
+### Install Requirements
+
+``` shell
+conda create -n aisys python=3.10
+conda activate aisys
+pip install -r requirements.txt
 ```
 
-Environment setting:
+### How to use MultimodalDataLoadManager
+- This is an example for image-audio multimodal system
+``` python
+from multimodal_dataloader import MultimodalDataLoadManager, RealTimeDataPipe
+from realtime_dataloader import DataLoader as RealTimeDataLoader
+
+# Your multimodal model is here
+model = model.cuda()
+model.eval()
+
+# Create RealTimeDataPipes and RealTimeDataLoaders
+datapipes = {}
+dataloaders = {}
+
+datapipes['image'] = RealTimeDataPipe(read_image, preprocess_image)
+dataloaders['image'] = RealTimeDataLoader(datapipes['image'], num_workers = 1, batch_size = 1, shuffle = False)
+
+datapipes['audio'] = RealTimeDataPipe(read_audio, preprocess_audio)
+dataloaders['image'] = RealTimeDataLoader(datapipes['audio'], num_workers = 1, batch_size = 1, shuffle = False)
+
+# Define feature extractor dictionary
+feature_extractors = {}
+feature_extractors['image'] = model.extract_feature_image
+feature_extractors['audio'] = model.extract_feature_audio
+
+# Create MultimodalDataLoadManager
+manager = MultimodalDataLoadManager(
+    dataloaders,
+    feature_extractors,
+)
+
+# Inference loop
+for step in range(5):
+    features = manager.get_data()
+
+    output = model.fusion(features)
+    ...
 ```
-conda create -n mmsys python=3.7
-conda activate mmsys
 
+
+## Experiments
+### Run Synthetic Experiments
+``` shell
+CUDA_VISIBLE_DEVICE=0 python exp_synthetic.py --config [config_file]
 ```
+All configs for the synthetic experiments are in [configs/synthetic](configs/synthetic)
 
-Train the model with CIFAR-10 dataset:
+### Run AVSR Experiments
+
+- TODO (Keighley)
+
+``` shell
+CUDA_VISIBLE_DEVICE=0 python exp_avsr.py --config [config_file]
 ```
-CUDA_VISIBLE_DEVICES=1 python main.py
-```
-
-</br>
-
-## Pretrained Models
-Epoch: 350
-Model | Pretrained (.pth) | Paper | Accuracy | Architecture
---- | --- | --- | --- | ---
-HCGNet | [Google Drive](https://drive.google.com/file/d/11SvHuhBjHElmlp80dIJn0AokisiewLNd/view?usp=sharing) | [Arxiv](https://arxiv.org/pdf/1908.09699.pdf) | 91.92% | hybrid (dense, residual) connectivity, micro-module and attention-based forget and update gates
-DenseNet | [Google Drive](https://drive.google.com/file/d/14-y22orjDvQJBPm6vYiMnDP3FLYYzAcH/view?usp=sharing) | [Arxiv](https://arxiv.org/pdf/1608.06993.pdf) | 90.18% | identity mappings, deep supervision, and diversified depth
-PyramidNet | [Google Drive](https://drive.google.com/file/d/1Ln7e7n6KIN8xYTBPHR43H_Uh07AEt7LC/view?usp=sharing) | [Arxiv](https://arxiv.org/pdf/1610.02915.pdf) | 89.89% | increasing the feature map dimension gradually
-ResNeXT | [Google Drive](https://drive.google.com/file/d/1HAS2WeF1i8IwaiRMFA_xFBqmi6fAlip4/view?usp=sharing) | [Arxiv](https://arxiv.org/pdf/1611.05431.pdf) | 89.51% | aggregates a set of transformations with the same topology
-DPN | [Google Drive](https://drive.google.com/file/d/1W6EZ-caNd9N6m7eIRzl-cx5N2RUDUh14/view?usp=sharing) | [Arxiv](https://arxiv.org/pdf/1707.01629.pdf) | 89.25% | integrate feature re-usage (ResNet) and new features exploration (DenseNet)
-
-</br>
-
-## Reference
-https://pytorch.org/tutorials/beginner/blitz/cifar10_tutorial.html</br>
-https://github.com/lukemelas/EfficientNet-PyTorch</br>
-https://github.com/facebookresearch/LaMCTS</br>
-https://github.com/kekmodel/MPL-pytorch</br>
-https://github.com/MadryLab/cifar10_challenge</br>
-https://github.com/xiaolai-sqlai/mobilenetv3</br>
-https://github.com/EN10/CIFAR</br>
-https://medium.com/@sergioalves94/deep-learning-in-pytorch-with-cifar-10-dataset-858b504a6b54</br>
+All configs for the synthetic experiments are in [configs/avsr](configs/synthetic)
