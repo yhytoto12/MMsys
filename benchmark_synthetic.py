@@ -23,7 +23,7 @@ from multimodal_dataloader import (
 from torch.profiler import profile, schedule, ProfilerActivity, tensorboard_trace_handler, record_function
 
 def read_image():
-    return np.random.randint(0, 256, (1080, 720, 3), dtype=np.uint8)
+    return np.random.randint(0, 256, (1280, 720, 3), dtype=np.uint8)
 
 class fusion_net(nn.Module):
     def __init__(self, in_features, out_features):
@@ -38,14 +38,33 @@ class fusion_net(nn.Module):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--config', type=str, default='configs/synthetic.yaml')
-    # parser.add_argument('--log_dir', type=str, default='log')
+    parser.add_argument('--num_modes', type=int, default=0)
+    parser.add_argument('--log_dir', type=str, default=None)
 
     args = parser.parse_args()
 
     config = OmegaConf.load(args.config)
 
-    num_modes = config.num_modes
-    manager_type = config.manager.type # naive, our1, our2
+    if args.num_modes == 0:
+        num_modes = config.num_modes
+    else:
+        num_modes = args.num_modes
+
+    manager_type = config.manager.type # sequential, parallel
+
+    if args.log_dir is not None:
+        if manager_type == 'sequential':
+            profile_name = f'{manager_type}_{config.feature_extractors[0]}_{num_modes}'
+        else:
+            if config.manager.preprocess_only:
+                profile_name = f'{manager_type}_naive_{config.feature_extractors[0]}_{num_modes}'
+            else:
+                profile_name = f'{manager_type}_improved_{config.feature_extractors[0]}_{num_modes}'
+
+        trace_handler = tensorboard_trace_handler(args.log_dir, profile_name)
+    else:
+        trace_handler = None
+
     feature_extractors = config.feature_extractors
 
     modes = [f'M{i}' for i in range(num_modes)]
@@ -57,8 +76,8 @@ if __name__ == '__main__':
     preprocess_fn_dict = {
         mode : transforms.Compose([
             transforms.ToTensor(),
-            transforms.CenterCrop(224),
             transforms.Resize(224, antialias = True),
+            transforms.CenterCrop(224),
             transforms.Normalize(0.5, 0.5),
         ]) for mode in modes
     }
@@ -66,13 +85,17 @@ if __name__ == '__main__':
     total_feature_dim = 0
     feature_extractor_dict = {}
     for i, mode in enumerate(modes):
-        model = eval(feature_extractors[i])()
+        if len(feature_extractors) < num_modes:
+            model = eval(feature_extractors[0])()
+        else:
+            model = eval(feature_extractors[i])()
         total_feature_dim += model.fc.in_features
         model.fc = nn.Identity()
         model.eval()
         feature_extractor_dict[mode] = model.cuda()
 
     fusion = fusion_net(total_feature_dim, config.fusion.out_features).cuda()
+    torch.cuda.synchronize()
 
     if 'sequential' in manager_type:
         datapipes = RealTimeMultimodalDataPipe(read_fn_dict, preprocess_fn_dict)
@@ -81,7 +104,7 @@ if __name__ == '__main__':
         with profile(
             activities = [ProfilerActivity.CPU, ProfilerActivity.CUDA],
             schedule = schedule(wait = 1, warmup = 2, active = config.profiler.num_iterations),
-            on_trace_ready = tensorboard_trace_handler(config.profiler.log_dir, config.profiler.name),
+            on_trace_ready = trace_handler,
         ) as prof:
             for i in range(3 + config.profiler.num_iterations):
                 data = next(dl)
@@ -96,7 +119,6 @@ if __name__ == '__main__':
 
             avg_time, std = get_profile_stats(prof)
             print(f'average time : {avg_time:.3f} ± {std:.3f} ms')
-            # print(prof.key_averages().table(sort_by='cpu_time_total', row_limit=5))
 
     elif 'parallel' in manager_type:
         datapipe_dict = {
@@ -125,7 +147,7 @@ if __name__ == '__main__':
         with profile(
             activities = [ProfilerActivity.CPU, ProfilerActivity.CUDA],
             schedule = schedule(wait = 1, warmup = 2, active = config.profiler.num_iterations),
-            on_trace_ready = tensorboard_trace_handler(config.profiler.log_dir, config.profiler.name),
+            on_trace_ready = trace_handler,
         ) as prof:
             for i in range(3 + config.profiler.num_iterations):
                 features = manager.get_data()

@@ -1,8 +1,6 @@
 # Improved Multimodal Real-Time Data Loading
 
-- Describe our methods
-<img src='assets/algorithm.png'>
-
+<embed src="assets/framework_overview.pdf" type="application/pdf" width="100%"/>
 
 ## Requirements
 
@@ -14,8 +12,8 @@
 ### Install Requirements
 
 ``` shell
-conda create -n aisys python=3.10
-conda activate aisys
+conda create -n mmsys python=3.10
+conda activate mmsys
 pip install -r requirements.txt
 ```
 
@@ -52,7 +50,7 @@ manager = MultimodalDataLoadManager(
 
 # Inference loop
 for step in range(5):
-    features = manager.get_data()
+    features = manager.get_data() # Dict()
 
     output = model.fusion(features)
     ...
@@ -62,15 +60,23 @@ for step in range(5):
 ## Experiments
 ### Run Synthetic Experiments
 ``` shell
-CUDA_VISIBLE_DEVICE=0 python exp_synthetic.py --config [config_file]
+python benchmark_synthetic.py --config <config_file> [--num_modes <num_modes>]
 ```
-All configs for the synthetic experiments are in [configs/synthetic](configs/synthetic)
+All configs for the synthetic experiments are in [configs/synthetic](configs/synthetic) folder
+
+-  For reproducing the results on Figure 3 in the reports
+``` shell
+python scripts/run_synthetic_resnet.py
+```
+- For reproducing the results on Figure 4 in the reports
+``` shell
+python scripts/run_synthetic_nummodes.py
+```
 
 ### Run AVSR Experiments
 
 - TODO (Keighley)
 
 ``` shell
-CUDA_VISIBLE_DEVICE=0 python exp_avsr.py --config [config_file]
+python benchmark_avsr.py --config [config_file]
 ```
-All configs for the synthetic experiments are in [configs/avsr](configs/synthetic)

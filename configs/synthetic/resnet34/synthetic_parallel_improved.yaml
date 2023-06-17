@@ -14,5 +14,3 @@ fusion:
 
 profiler:
   num_iterations: 10
-  log_dir: log/synthetic
-  name: parallel
