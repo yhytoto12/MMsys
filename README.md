@@ -1,6 +1,6 @@
 # Improved Multimodal Real-Time Data Loading
 
-<embed src="assets/framework_overview.pdf" type="application/pdf" width="100%"/>
+![](assets/framework_overview.png)
 
 ## Requirements
 
