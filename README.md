@@ -20,7 +20,7 @@ To install, run the following commands in an environment where cuda and GPU usag
 conda create -n mmsys python=3.10
 conda activate mmsys
 conda install pytorch torchvision torchaudio pytorch-cuda=11.7 -c pytorch -c nvidia
-pip install -r requirements_synthetic.txt
+pip install -r requirements.txt
 ```
 
 ### How to use MultimodalDataLoadManager
