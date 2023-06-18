@@ -2,6 +2,9 @@
 
 ![](assets/framework_overview.png)
 
+This is the repository for the project "Improved Multimodal Real-Time Data Loading" for SNU's SP2023 Big Data and AI Systems course.
+We implemented a dataloader for multimodal models that loads, processes, transforms, and encodes each data modality individually, so they can take advantage of parallelism and show increased performance.
+
 ## Requirements
 
 - Python 3.10
@@ -11,9 +14,12 @@
 ## Quick Start
 ### Install Requirements
 
+To install, run the following commands in an environment where cuda and GPU usage is available:
+
 ``` shell
 conda create -n mmsys python=3.10
 conda activate mmsys
+conda install pytorch torchvision torchaudio pytorch-cuda=11.7 -c pytorch -c nvidia
 pip install -r requirements_synthetic.txt
 ```
 
@@ -75,8 +81,37 @@ python scripts/run_synthetic_nummodes.py
 
 ### Run AVSR Experiments
 
-- TODO (Keighley)
+- To run the AVSR experiments, you'll need to install a pretrained AVSR model from their original [model zoo](https://github.com/mpc001/Visual_Speech_Recognition_for_Multiple_Languages#Model-Zoo). Install the AutoAVSR model for Lip Reading Sentences 3 (LRS3) using Audio-visual components. Then, move this model to
+```
+ASVR/Visual_Speech_Recognition_for_Multiple_Languages/benchmarks/LRS3/models
+```
+and unzip it.
+
+Then, run the following code to generate a VizTracer log file for the original model:
 
 ``` shell
-python benchmark_avsr.py --config [config_file]
+viztracer --log_sparse avsr_demo.py config_filename=configs/LRS3_AV_WER0.9.ini data_filename=../example_videos/aisystems_demo detector=mediapipe parallel=False -o logs/baseline/sequential_avsr_demo.json
+```
+
+And for the parallel (our) version:
+
+``` shell
+viztracer --log_sparse avsr_demo.py config_filename=configs/LRS3_AV_WER0.9.ini data_filename=../example_videos/aisystems_demo detector=mediapipe parallel=True -o logs/ours/parallel_avsr_demo.json
+```
+
+You can then check the loadtimes using 
+``` shell
+python check_runtime.py -f logs/baseline/sequential_avsr_demo.json
+
+python check_runtime.py -f logs/ours/parallel_avsr_demo.json
+```
+
+Note that the load times will be inconsistent; though it is likely our parallel version will run faster, it is not guaranteed. Runtimes will also differ across GPU's. Several runs may required to see average results.
+
+You can also view the VizTracer stack traces and see the parallel vs. sequential traces by running:
+
+``` shell
+vizviewer logs/baseline/sequential_avsr_demo.json --port 4112
+
+vizviewer logs/ours/parallel_avsr_demo.json --port 4112
 ```
