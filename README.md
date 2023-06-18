@@ -14,7 +14,7 @@ We implemented a dataloader for multimodal models that loads, processes, transfo
 ## Quick Start
 ### Install Requirements
 
-To install, run the following commands in an environment where cuda and a GPU is available:
+To install, run the following commands in an environment where cuda and GPU usage is available:
 
 ``` shell
 conda create -n mmsys python=3.10
