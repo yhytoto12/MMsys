@@ -134,7 +134,7 @@ torch-tb-profiler==0.4.1
 # torchaudio==2.0.1
 # torchdata==0.6.1
 # torchvision==0.15.1
-tornado==6.3.1
+tornado==6.3.3
 tqdm==4.65.0
 traitlets==5.9.0
 triton==2.0.0
